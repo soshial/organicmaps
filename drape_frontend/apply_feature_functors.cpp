@@ -308,18 +308,18 @@ dp::Anchor GetShieldAnchor(uint8_t shieldIndex, uint8_t shieldCount)
   return dp::Center;
 }
 
-m2::PointF GetShieldOffset(dp::Anchor anchor, double borderWidth, double borderHeight)
+m2::PointF GetShieldOffset(dp::Anchor anchor, double paddingWidth, double paddingHeight)
 {
   m2::PointF offset(0.0f, 0.0f);
   if (anchor & dp::Left)
-    offset.x = static_cast<float>(borderWidth);
+    offset.x = static_cast<float>(paddingWidth);
   else if (anchor & dp::Right)
-    offset.x = -static_cast<float>(borderWidth);
+    offset.x = -static_cast<float>(paddingWidth);
 
   if (anchor & dp::Top)
-    offset.y = static_cast<float>(borderHeight);
+    offset.y = static_cast<float>(paddingHeight);
   else if (anchor & dp::Bottom)
-    offset.y = -static_cast<float>(borderHeight);
+    offset.y = -static_cast<float>(paddingHeight);
   return offset;
 }
 
@@ -912,9 +912,9 @@ void ApplyLineFeatureAdditional::GetRoadShieldsViewParams(ref_ptr<dp::TextureMan
   double const fontScale = df::VisualParams::Instance().GetFontScale();
   auto const anchor = GetShieldAnchor(shieldIndex, shieldCount);
   m2::PointF const shieldOffset = GetShieldOffset(anchor, 2.0, 2.0);
-  double const borderWidth = 5.0 * mainScale;
-  double const borderHeight = 1.5 * mainScale;
-  m2::PointF const shieldTextOffset = GetShieldOffset(anchor, borderWidth, borderHeight);
+  double const paddingWidth = 5.0 * mainScale;
+  double const paddingHeight = 1.5 * mainScale;
+  m2::PointF const shieldTextOffset = GetShieldOffset(anchor, paddingWidth, paddingHeight);
 
   dp::FontDecl font;
   ShieldRuleProtoToFontDecl(m_shieldRule, font);
@@ -932,12 +932,13 @@ void ApplyLineFeatureAdditional::GetRoadShieldsViewParams(ref_ptr<dp::TextureMan
   textParams.m_titleDecl.m_secondaryOptional = false;
   textParams.m_startOverlayRank = dp::OverlayRank1;
 
+  // TODO(AB): Only the width and height of text is used/needed from this layout.
   TextLayout textLayout;
-  textLayout.Init(strings::MakeUniString(roadNumber), font.m_size, texMng);
+  textLayout.Init(roadNumber, font.m_size, texMng);
 
   // Calculate width and height of a shield.
-  shieldPixelSize.x = textLayout.GetPixelLength() + 2.0 * borderWidth;
-  shieldPixelSize.y = textLayout.GetPixelHeight() + 2.0 * borderHeight;
+  shieldPixelSize.x = textLayout.GetPixelLength() + 2.0 * paddingWidth;
+  shieldPixelSize.y = textLayout.GetPixelHeight() + 2.0 * paddingHeight;
   textParams.m_limitedText = true;
   textParams.m_limits = shieldPixelSize * 0.9;
 
