@@ -16,13 +16,14 @@ namespace text
 {
 struct GlyphMetrics
 {
-  int16_t m_font;
+  int16_t m_fontIndex;
   uint16_t m_glyphId;
   // TODO(AB): Store original font units or floats?
   int32_t m_xOffset;
   int32_t m_yOffset;
   int32_t m_xAdvance;
-  // yAdvance is used only in vertical text layouts.
+  // yAdvance is used only in vertical text layouts and is 0 for horizonlat texts.
+  int32_t m_yAdvance {0};
 };
 
 // TODO(AB): Move to a separate file?
@@ -35,6 +36,10 @@ struct TextMetrics
   void AddGlyphMetrics(int16_t font, uint16_t glyphId, int32_t xOffset, int32_t yOffset, int32_t xAdvance, int32_t height)
   {
     m_glyphs.push_back({font, glyphId, xOffset, yOffset, xAdvance});
+    if (m_glyphs.size() == 1)
+      xAdvance -= xOffset;
+    // if (yOffset > 0)
+    //   height += yOffset;  // TODO(AB): Is it needed? Is it correct?
     m_lineWidthInPixels += xAdvance;
     m_maxLineHeightInPixels = std::max(m_maxLineHeightInPixels, height);
   }
@@ -56,12 +61,8 @@ public:
   explicit GlyphManager(Params const & params);
   ~GlyphManager();
 
-  Glyph GetGlyph(strings::UniChar unicodePoints);
-
-  void MarkGlyphReady(Glyph const & glyph);
-  bool AreGlyphsReady(strings::UniString const & str) const;
-
-  Glyph const & GetInvalidGlyph() const;
+  void MarkGlyphReady(int16_t fontIndex, uint16_t glyphId);
+  bool AreGlyphsReady(TGlyphs const & str) const;
 
   int GetFontIndex(strings::UniChar unicodePoint);
   int GetFontIndex(std::u16string_view sv);
