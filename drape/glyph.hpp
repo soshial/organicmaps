@@ -4,6 +4,8 @@
 #include "base/buffer_vector.hpp"
 #include "base/shared_buffer_manager.hpp"
 
+#include <tuple>  // std::tie
+
 namespace dp
 {
 struct GlyphImage
@@ -29,19 +31,30 @@ struct GlyphImage
   SharedBufferManager::shared_buffer_ptr_t m_data;
 };
 
-using TGlyph = std::pair<int16_t /* fontIndex */, uint16_t /* glyphId */>;
+struct GlyphFontAndId
+{
+  int16_t fontIndex;
+  uint16_t glyphId;
+
+  bool operator<(GlyphFontAndId const & other) const
+  {
+    return std::tie(fontIndex, glyphId) < std::tie (other.fontIndex, other.glyphId);
+  }
+};
+
+
+//using TGlyph = std::pair<int16_t /* fontIndex */, uint16_t /* glyphId */>;
 // TODO(AB): Measure if 32 is the best value here.
-using TGlyphs = buffer_vector<TGlyph, 32>;
+using TGlyphs = buffer_vector<GlyphFontAndId, 32>;
 
 struct Glyph
 {
-  Glyph(GlyphImage && image, int16_t fontIndex, uint16_t glyphId)
-  : m_image(image), m_fontIndex(fontIndex), m_glyphId(glyphId)
+  Glyph(GlyphImage && image, GlyphFontAndId key)
+  : m_image(image), m_key(key)
   {}
 
   GlyphImage m_image;
-  int16_t m_fontIndex;
-  uint16_t m_glyphId;
+  GlyphFontAndId m_key;
 };
 }  // namespace dp
 

@@ -125,7 +125,7 @@ public:
 private:
   struct GlyphGroup
   {
-    std::set<TGlyph> m_glyphs;
+    std::set<GlyphFontAndId> m_glyphKeys;
     ref_ptr<Texture> m_texture {nullptr};
   };
 
@@ -133,14 +133,9 @@ private:
   uint32_t m_maxGlypsCount;
 
   ref_ptr<Texture> AllocateGlyphTexture();
-  void GetRegionBase(ref_ptr<Texture> tex, TextureManager::BaseRegion & region, Texture::Key const & key);
-
-  void GetGlyphsRegions(ref_ptr<FontTexture> tex, strings::UniString const & text, TGlyphsBuffer & regions);
+  void GetRegionBase(ref_ptr<Texture> tex, BaseRegion & region, Texture::Key const & key);
 
   size_t FindHybridGlyphsGroup(std::vector<text::GlyphMetrics> const & glyphs);
-  // TODO(AB): Remove
-  size_t FindHybridGlyphsGroup(strings::UniString const & text);
-  size_t FindHybridGlyphsGroup(TMultilineText const & text);
 
   static uint32_t GetNumberOfGlyphsNotInGroup(std::vector<text::GlyphMetrics> const & glyphs, GlyphGroup const & group);
 

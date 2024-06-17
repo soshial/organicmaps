@@ -29,6 +29,7 @@ private:
   bool m_isFull = false;
 };
 
+// TODO(AB): is this class really needed?
 class GlyphKey : public Texture::Key
 {
 public:
@@ -66,8 +67,8 @@ public:
   ~GlyphIndex();
 
   // This function can return nullptr.
-  ref_ptr<Texture::ResourceInfo> MapResource(GlyphKey const & key, bool & newResource);
-  std::vector<ref_ptr<Texture::ResourceInfo>> MapResources(std::vector<GlyphKey> const & keys, bool & hasNewResources);
+  ref_ptr<Texture::ResourceInfo> MapResource(GlyphFontAndId const & key, bool & newResource);
+  std::vector<ref_ptr<Texture::ResourceInfo>> MapResources(TGlyphs const & keys, bool & hasNewResources);
   void UploadResources(ref_ptr<dp::GraphicsContext> context, ref_ptr<Texture> texture);
 
   bool CanBeGlyphPacked(uint32_t glyphsCount) const;
@@ -79,7 +80,7 @@ private:
   GlyphPacker m_packer;
   ref_ptr<GlyphManager> m_mng;
 
-  using ResourceMapping = std::map<GlyphKey, GlyphInfo>;
+  using ResourceMapping = std::map<GlyphFontAndId, GlyphInfo>;
   using PendingNode = std::pair<m2::RectU, Glyph>;
   using PendingNodes = std::vector<PendingNode>;
 
@@ -88,7 +89,7 @@ private:
   std::mutex m_mutex;
 };
 
-class FontTexture : public DynamicTexture<GlyphIndex, GlyphKey, Texture::ResourceType::Glyph>
+class FontTexture : public DynamicTexture<GlyphIndex, GlyphFontAndId, Texture::ResourceType::Glyph>
 {
 public:
   FontTexture(m2::PointU const & size, ref_ptr<GlyphManager> glyphMng, ref_ptr<HWTextureAllocator> allocator)
@@ -100,7 +101,7 @@ public:
 
   ~FontTexture() override { Reset(); }
 
-  ref_ptr<ResourceInfo> MapResource(GlyphKey const & key, bool & hasNewResources) const
+  ref_ptr<ResourceInfo> MapResource(GlyphFontAndId const & key, bool & hasNewResources) const
   {
     ASSERT(m_indexer != nullptr, ());
     return m_indexer->MapResource(key, hasNewResources);
