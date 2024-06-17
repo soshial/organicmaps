@@ -16,13 +16,13 @@ namespace text
 {
 struct GlyphMetrics
 {
-  int16_t m_fontIndex;
-  uint16_t m_glyphId;
+  GlyphFontAndId m_key;
+
   // TODO(AB): Store original font units or floats?
   int32_t m_xOffset;
   int32_t m_yOffset;
   int32_t m_xAdvance;
-  // yAdvance is used only in vertical text layouts and is 0 for horizonlat texts.
+  // yAdvance is used only in vertical text layouts and is 0 for horizontal texts.
   int32_t m_yAdvance {0};
 };
 
@@ -35,7 +35,7 @@ struct TextMetrics
 
   void AddGlyphMetrics(int16_t font, uint16_t glyphId, int32_t xOffset, int32_t yOffset, int32_t xAdvance, int32_t height)
   {
-    m_glyphs.push_back({font, glyphId, xOffset, yOffset, xAdvance});
+    m_glyphs.push_back({{font, glyphId}, xOffset, yOffset, xAdvance});
     if (m_glyphs.size() == 1)
       xAdvance -= xOffset;
     // if (yOffset > 0)
@@ -61,7 +61,7 @@ public:
   explicit GlyphManager(Params const & params);
   ~GlyphManager();
 
-  void MarkGlyphReady(int16_t fontIndex, uint16_t glyphId);
+  void MarkGlyphReady(GlyphFontAndId key);
   bool AreGlyphsReady(TGlyphs const & str) const;
 
   int GetFontIndex(strings::UniChar unicodePoint);

@@ -570,11 +570,11 @@ int GlyphManager::FindFontIndexInBlock(UnicodeBlock const & block, strings::UniC
   return kInvalidFont;
 }
 
-void GlyphManager::MarkGlyphReady(int16_t fontIndex, uint16_t glyphId)
+void GlyphManager::MarkGlyphReady(GlyphFontAndId key)
 {
-  ASSERT_GREATER_OR_EQUAL(fontIndex, 0, ());
-  ASSERT_LESS(fontIndex, static_cast<int>(m_impl->m_fonts.size()), ());
-  m_impl->m_fonts[fontIndex]->MarkGlyphReady(glyphId);
+  ASSERT_GREATER_OR_EQUAL(key.fontIndex, 0, ());
+  ASSERT_LESS(key.fontIndex, static_cast<int>(m_impl->m_fonts.size()), ());
+  m_impl->m_fonts[key.fontIndex]->MarkGlyphReady(key.glyphId);
 }
 
 bool GlyphManager::AreGlyphsReady(TGlyphs const & glyphs) const

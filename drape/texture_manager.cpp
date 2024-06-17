@@ -235,8 +235,7 @@ ref_ptr<Texture> TextureManager::AllocateGlyphTexture()
   return make_ref(m_glyphTextures.back());
 }
 
-void TextureManager::GetRegionBase(ref_ptr<Texture> tex, TextureManager::BaseRegion & region,
-                                   Texture::Key const & key)
+void TextureManager::GetRegionBase(ref_ptr<Texture> tex, BaseRegion & region, Texture::Key const & key)
 {
   bool isNew = false;
   region.SetResourceInfo(tex != nullptr ? tex->FindResource(key, isNew) : nullptr);
@@ -249,10 +248,10 @@ void TextureManager::GetRegionBase(ref_ptr<Texture> tex, TextureManager::BaseReg
 uint32_t TextureManager::GetNumberOfGlyphsNotInGroup(std::vector<text::GlyphMetrics> const & glyphs, GlyphGroup const & group)
 {
   uint32_t count = 0;
-  auto const end = group.m_glyphs.end();
+  auto const end = group.m_glyphKeys.end();
   for (auto const & glyph : glyphs)
   {
-    if (group.m_glyphs.find({glyph.m_fontIndex, glyph.m_glyphId}) == end)
+    if (group.m_glyphKeys.find(glyph.m_key) == end)
       ++count;
   }
 
@@ -277,7 +276,7 @@ size_t TextureManager::FindHybridGlyphsGroup(std::vector<text::GlyphMetrics> con
   // If we have got the only texture (in most cases it is), we can omit checking of glyphs usage.
   if (hasEnoughSpace)
   {
-    size_t const glyphsCount = group.m_glyphs.size() + glyphs.size();
+    size_t const glyphsCount = group.m_glyphKeys.size() + glyphs.size();
     if (m_glyphGroups.size() == 1 && glyphsCount < m_maxGlypsCount)
       return 0;
   }
@@ -291,7 +290,7 @@ size_t TextureManager::FindHybridGlyphsGroup(std::vector<text::GlyphMetrics> con
 
   // Check if we can fit all glyphs in the last hybrid texture.
   uint32_t const unfoundChars = GetNumberOfGlyphsNotInGroup(glyphs, group);
-  uint32_t const newCharsCount = static_cast<uint32_t>(group.m_glyphs.size()) + unfoundChars;
+  uint32_t const newCharsCount = static_cast<uint32_t>(group.m_glyphKeys.size()) + unfoundChars;
   if (newCharsCount >= m_maxGlypsCount || !group.m_texture->HasEnoughSpace(unfoundChars))
     m_glyphGroups.emplace_back();
 
@@ -501,7 +500,7 @@ text::TextMetrics TextureManager::ShapeSingleTextLine(float fontPixelHeight, std
 
   // Mark used glyphs.
   for (auto const & glyph : glyphs)
-    group.m_glyphs.emplace(glyph.m_fontIndex, glyph.m_glyphId);
+    group.m_glyphKeys.insert(glyph.m_key);
 
   if (!group.m_texture)
     group.m_texture = AllocateGlyphTexture();
@@ -514,7 +513,7 @@ text::TextMetrics TextureManager::ShapeSingleTextLine(float fontPixelHeight, std
   for (auto const & glyph : glyphs)
   {
     bool newResource = false;
-    auto fontTexture = static_cast<FontTexture *>(group.m_texture.get())->MapResource(GlyphKey{glyph.m_fontIndex, glyph.m_glyphId}, newResource);
+    auto fontTexture = static_cast<FontTexture *>(group.m_texture.get())->MapResource(glyph.m_key, newResource);
     hasNewResources |= newResource;
 
     if (glyphRegions)

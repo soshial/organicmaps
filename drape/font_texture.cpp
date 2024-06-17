@@ -97,7 +97,7 @@ GlyphIndex::~GlyphIndex()
   m_pendingNodes.clear();
 }
 
-std::vector<ref_ptr<Texture::ResourceInfo>> GlyphIndex::MapResources(std::vector<GlyphKey> const & keys,
+std::vector<ref_ptr<Texture::ResourceInfo>> GlyphIndex::MapResources(TGlyphs const & keys,
                                                                      bool & hasNewResources)
 {
   std::vector<ref_ptr<Texture::ResourceInfo>> info;
@@ -115,7 +115,7 @@ std::vector<ref_ptr<Texture::ResourceInfo>> GlyphIndex::MapResources(std::vector
   return info;
 }
 
-ref_ptr<Texture::ResourceInfo> GlyphIndex::MapResource(GlyphKey const & key, bool & newResource)
+ref_ptr<Texture::ResourceInfo> GlyphIndex::MapResource(GlyphFontAndId const & key, bool & newResource)
 {
   newResource = false;
   if (auto const found = m_index.find(key); found != m_index.end())
@@ -124,18 +124,18 @@ ref_ptr<Texture::ResourceInfo> GlyphIndex::MapResource(GlyphKey const & key, boo
   newResource = true;
 
   constexpr bool kUseSdf = true;
-  GlyphImage glyphImage = m_mng->GetGlyphImage(key.GetFontIndex(), key.GetGlyphId(), dp::kBaseFontSizePixels, kUseSdf);
+  GlyphImage glyphImage = m_mng->GetGlyphImage(key.fontIndex, key.glyphId, dp::kBaseFontSizePixels, kUseSdf);
   m2::RectU r;
   if (!m_packer.PackGlyph(glyphImage.m_width, glyphImage.m_height, r))
   {
     glyphImage.Destroy();
 
-    LOG(LWARNING, ("Glyphs packer could not pack a glyph with fontIndex =", key.GetFontIndex(),
-                   "glyphId =", key.GetGlyphId(), "w =", glyphImage.m_width, "h =", glyphImage.m_height,
+    LOG(LWARNING, ("Glyphs packer could not pack a glyph with fontIndex =", key.fontIndex,
+                   "glyphId =", key.glyphId, "w =", glyphImage.m_width, "h =", glyphImage.m_height,
                    "packerSize =", m_packer.GetSize()));
 
     // TODO(AB): Is it a valid invalid glyph?
-    GlyphKey const kInvalidGlyphKey{0, 0};
+    GlyphFontAndId constexpr kInvalidGlyphKey{0, 0};
     if (auto const found = m_index.find(kInvalidGlyphKey); found != m_index.end())
     {
       newResource = false;
@@ -152,7 +152,7 @@ ref_ptr<Texture::ResourceInfo> GlyphIndex::MapResource(GlyphKey const & key, boo
 
   {
     std::lock_guard lock(m_mutex);
-    m_pendingNodes.emplace_back(r, Glyph{std::move(glyphImage), key.GetFontIndex(), key.GetGlyphId()});
+    m_pendingNodes.emplace_back(r, Glyph{std::move(glyphImage), key});
   }
 
   return make_ref(&res.first->second);
@@ -190,7 +190,7 @@ void GlyphIndex::UploadResources(ref_ptr<GraphicsContext> context, ref_ptr<Textu
   for (auto it = pendingNodes.begin(); it != pendingNodes.end();)
   {
     // TODO(AB): Is it possible to mark and check if there is no image before uploading?
-    m_mng->MarkGlyphReady(it->second.m_fontIndex, it->second.m_glyphId);
+    m_mng->MarkGlyphReady(it->second.m_key);
 
     if (it->second.m_image.m_data)
       ++it;
