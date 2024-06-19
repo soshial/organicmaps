@@ -6,7 +6,6 @@
 #include "shaders/programs.hpp"
 
 #include "base/stl_helpers.hpp"
-#include "base/string_utils.hpp"
 
 #include "drape/font_constants.hpp"
 
@@ -237,12 +236,9 @@ dp::TGlyphs StaticLabel::CacheStaticText(std::string const & text, char const * 
   dp::TGlyphs glyphs;
   for (auto const & line : shapedLines)
     for (auto const & glyph : line.m_glyphs)
-      glyphs.emplace_back(glyph.m_fontIndex, glyph.m_glyphId);
+      glyphs.emplace_back(glyph.m_key);
 
-  std::ranges::sort(glyphs);
-  auto [begin, end] = std::ranges::unique(glyphs);
-  glyphs.erase(begin, end);
-
+  base::SortUnique(glyphs);
   return glyphs;
 }
 
@@ -307,7 +303,7 @@ dp::TGlyphs MutableLabel::GetGlyphs() const
 {
   dp::TGlyphs glyphs;
   for (auto const & glyph : m_shapedText.m_glyphs)
-    glyphs.emplace_back(glyph.m_fontIndex, glyph.m_glyphId);
+    glyphs.emplace_back(glyph.m_key);
   return glyphs;
 }
 
@@ -398,51 +394,20 @@ void MutableLabel::SetText(LabelResult & result, std::string text, ref_ptr<dp::T
       maxHeight = std::max(maxHeight, offsets.y + glyph.GetPixelHeight() * m_textRatio);
   }
 
-  // float maxHeight = 0.0f;
-  // float length = 0.0f;
-  // glsl::vec2 pen = glsl::vec2(0.0, 0.0);
-
-  // for (strings::UniChar c : uniText)
-  // {
-  //   auto const it = std::find_if(m_alphabet.begin(), m_alphabet.end(),
-  //                                [&c](TAlphabetNode const & n)
-  //   {
-  //     return n.first == c;
-  //   });
-  //
-  //   ASSERT(it != m_alphabet.end(), ());
-  //   if (it != m_alphabet.end())
-  //   {
-  //     std::array<glsl::vec2, 4> normals, maskTex;
-  //     dp::TextureManager::GlyphRegion const & glyph = it->second;
-  //     glsl::vec2 const offsets = GetNormalsAndMask(glyph, m_textRatio, normals, maskTex);
-  //
-  //     ASSERT_EQUAL(normals.size(), maskTex.size(), ());
-  //
-  //     for (size_t i = 0; i < normals.size(); ++i)
-  //       result.m_buffer.emplace_back(pen + normals[i], maskTex[i]);
-  //
-  //     float const advance = glyph.GetAdvanceX() * m_textRatio;
-  //     length += advance + offsets.x;
-  //     pen += glsl::vec2(advance, glyph.GetAdvanceY() * m_textRatio);
-  //     maxHeight = std::max(maxHeight, offsets.y + glyph.GetPixelHeight() * m_textRatio);
-  //   }
-  // }
-
-  glsl::vec2 anchorModifyer = glsl::vec2(-length / 2.0f, maxHeight / 2.0f);
+  glsl::vec2 anchorModifier = glsl::vec2(-length / 2.0f, maxHeight / 2.0f);
   if (m_anchor & dp::Right)
-    anchorModifyer.x = -length;
+    anchorModifier.x = -length;
   else if (m_anchor & dp::Left)
-    anchorModifyer.x = 0;
+    anchorModifier.x = 0;
 
   if (m_anchor & dp::Top)
-    anchorModifyer.y = maxHeight;
+    anchorModifier.y = maxHeight;
   else if (m_anchor & dp::Bottom)
-    anchorModifyer.y = 0;
+    anchorModifier.y = 0;
 
   for (DynamicVertex & v : result.m_buffer)
   {
-    v.m_normal += anchorModifyer;
+    v.m_normal += anchorModifier;
     result.m_boundRect.Add(glsl::ToPoint(v.m_normal));
   }
 }

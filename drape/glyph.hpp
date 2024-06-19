@@ -33,12 +33,22 @@ struct GlyphImage
 
 struct GlyphFontAndId
 {
-  int16_t fontIndex;
-  uint16_t glyphId;
+  int16_t m_fontIndex;
+  uint16_t m_glyphId;
+
+  // Required only for buffer_vector's internal T m_static[N];
+  GlyphFontAndId() = default;
+
+  constexpr GlyphFontAndId(int16_t fontIndex, uint16_t glyphId) : m_fontIndex(fontIndex), m_glyphId(glyphId) {}
+
+  bool operator==(GlyphFontAndId const & other) const
+  {
+    return m_fontIndex == other.m_fontIndex && m_glyphId == other.m_glyphId;
+  }
 
   bool operator<(GlyphFontAndId const & other) const
   {
-    return std::tie(fontIndex, glyphId) < std::tie (other.fontIndex, other.glyphId);
+    return std::tie(m_fontIndex, m_glyphId) < std::tie (other.m_fontIndex, other.m_glyphId);
   }
 };
 

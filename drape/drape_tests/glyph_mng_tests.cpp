@@ -92,7 +92,7 @@ public:
     for (auto const & glyph : shapedText.m_glyphs)
     {
       constexpr bool kUseSdfBitmap = false;
-      dp::GlyphImage img = m_mng->GetGlyphImage(glyph.m_fontIndex, glyph.m_glyphId, m_fontPixelSize, kUseSdfBitmap);
+      dp::GlyphImage img = m_mng->GetGlyphImage(glyph.m_key, m_fontPixelSize, kUseSdfBitmap);
 
       auto const w = img.m_width;
       auto const h = img.m_height;
@@ -115,7 +115,7 @@ public:
     for (auto const & glyph : shapedText.m_glyphs)
     {
       constexpr bool kUseSdfBitmap = true;
-      auto img = m_mng->GetGlyphImage(glyph.m_fontIndex, glyph.m_glyphId, m_fontPixelSize, kUseSdfBitmap);
+      auto img = m_mng->GetGlyphImage(glyph.m_key, m_fontPixelSize, kUseSdfBitmap);
 
       auto const w = img.m_width;
       auto const h = img.m_height;

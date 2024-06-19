@@ -352,7 +352,7 @@ dp::TGlyphs TextLayout::GetGlyphs() const
   dp::TGlyphs glyphs;
   glyphs.reserve(m_shapedGlyphs.m_glyphs.size());
   for (auto const & glyph : m_shapedGlyphs.m_glyphs)
-    glyphs.emplace_back(glyph.m_fontIndex, glyph.m_glyphId);
+    glyphs.emplace_back(glyph.m_key);
   return glyphs;
 }
 
