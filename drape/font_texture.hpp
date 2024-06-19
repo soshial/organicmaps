@@ -29,24 +29,15 @@ private:
   bool m_isFull = false;
 };
 
-// TODO(AB): is this class really needed?
-class GlyphKey : public Texture::Key
+class GlyphKey : public GlyphFontAndId, public Texture::Key
 {
 public:
-  GlyphKey(int16_t fontId, uint16_t glyphId) : m_fontIndex(fontId), m_glyphId(glyphId) {}
-
   Texture::ResourceType GetType() const override { return Texture::ResourceType::Glyph; }
-  int16_t GetFontIndex() const { return m_fontIndex; }
-  uint16_t GetGlyphId() const { return m_glyphId; }
 
-  bool operator<(GlyphKey const & other) const
-  {
-    return std::tie(m_fontIndex, m_glyphId) < std::tie (other.m_fontIndex, other.m_glyphId);
-  }
-
-private:
-  int16_t m_fontIndex;
-  uint16_t m_glyphId;
+  // bool operator<(GlyphKey const & other) const
+  // {
+  //   return std::tie(m_fontIndex, m_glyphId) < std::tie (other.m_fontIndex, other.m_glyphId);
+  // }
 };
 
 // TODO(AB): Make Texture::ResourceInfo non-abstract and use it here directly.
@@ -89,7 +80,7 @@ private:
   std::mutex m_mutex;
 };
 
-class FontTexture : public DynamicTexture<GlyphIndex, GlyphFontAndId, Texture::ResourceType::Glyph>
+class FontTexture : public DynamicTexture<GlyphIndex, GlyphKey, Texture::ResourceType::Glyph>
 {
 public:
   FontTexture(m2::PointU const & size, ref_ptr<GlyphManager> glyphMng, ref_ptr<HWTextureAllocator> allocator)

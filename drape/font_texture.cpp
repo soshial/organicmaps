@@ -124,14 +124,14 @@ ref_ptr<Texture::ResourceInfo> GlyphIndex::MapResource(GlyphFontAndId const & ke
   newResource = true;
 
   constexpr bool kUseSdf = true;
-  GlyphImage glyphImage = m_mng->GetGlyphImage(key.fontIndex, key.glyphId, dp::kBaseFontSizePixels, kUseSdf);
+  GlyphImage glyphImage = m_mng->GetGlyphImage(key, dp::kBaseFontSizePixels, kUseSdf);
   m2::RectU r;
   if (!m_packer.PackGlyph(glyphImage.m_width, glyphImage.m_height, r))
   {
     glyphImage.Destroy();
 
-    LOG(LWARNING, ("Glyphs packer could not pack a glyph with fontIndex =", key.fontIndex,
-                   "glyphId =", key.glyphId, "w =", glyphImage.m_width, "h =", glyphImage.m_height,
+    LOG(LWARNING, ("Glyphs packer could not pack a glyph with fontIndex =", key.m_fontIndex,
+                   "glyphId =", key.m_glyphId, "w =", glyphImage.m_width, "h =", glyphImage.m_height,
                    "packerSize =", m_packer.GetSize()));
 
     // TODO(AB): Is it a valid invalid glyph?

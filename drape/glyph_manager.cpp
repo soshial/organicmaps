@@ -572,9 +572,9 @@ int GlyphManager::FindFontIndexInBlock(UnicodeBlock const & block, strings::UniC
 
 void GlyphManager::MarkGlyphReady(GlyphFontAndId key)
 {
-  ASSERT_GREATER_OR_EQUAL(key.fontIndex, 0, ());
-  ASSERT_LESS(key.fontIndex, static_cast<int>(m_impl->m_fonts.size()), ());
-  m_impl->m_fonts[key.fontIndex]->MarkGlyphReady(key.glyphId);
+  ASSERT_GREATER_OR_EQUAL(key.m_fontIndex, 0, ());
+  ASSERT_LESS(key.m_fontIndex, static_cast<int>(m_impl->m_fonts.size()), ());
+  m_impl->m_fonts[key.m_fontIndex]->MarkGlyphReady(key.m_glyphId);
 }
 
 bool GlyphManager::AreGlyphsReady(TGlyphs const & glyphs) const
@@ -591,9 +591,9 @@ bool GlyphManager::AreGlyphsReady(TGlyphs const & glyphs) const
 }
 
 // TODO(AB): Check and support invalid glyphs.
-GlyphImage GlyphManager::GetGlyphImage(int fontIndex, uint16_t glyphId, int pixelHeight, bool sdf)
+GlyphImage GlyphManager::GetGlyphImage(GlyphFontAndId key, int pixelHeight, bool sdf)
 {
-  return m_impl->m_fonts[fontIndex]->GetGlyphImage(glyphId, pixelHeight, sdf);
+  return m_impl->m_fonts[key.m_fontIndex]->GetGlyphImage(key.m_glyphId, pixelHeight, sdf);
 }
 
 namespace

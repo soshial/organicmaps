@@ -1,8 +1,8 @@
 #pragma once
 
-#include "base/string_utils.hpp"
-
 #include "drape/glyph.hpp"
+
+#include "base/string_utils.hpp"
 
 #include <string>
 #include <vector>
@@ -36,6 +36,7 @@ struct TextMetrics
   void AddGlyphMetrics(int16_t font, uint16_t glyphId, int32_t xOffset, int32_t yOffset, int32_t xAdvance, int32_t height)
   {
     m_glyphs.push_back({{font, glyphId}, xOffset, yOffset, xAdvance});
+
     if (m_glyphs.size() == 1)
       xAdvance -= xOffset;
     // if (yOffset > 0)
@@ -70,7 +71,7 @@ public:
   text::TextMetrics ShapeText(std::string_view utf8, int fontPixelHeight, int8_t lang);
   text::TextMetrics ShapeText(std::string_view utf8, int fontPixelHeight, char const * lang);
 
-  GlyphImage GetGlyphImage(int fontIndex, uint16_t glyphId, int pixelHeight, bool sdf);
+  GlyphImage GetGlyphImage(GlyphFontAndId key, int pixelHeight, bool sdf);
 
 private:
   // Immutable version can be called from any thread and doesn't require internal synchronization.

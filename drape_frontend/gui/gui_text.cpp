@@ -237,11 +237,12 @@ dp::TGlyphs StaticLabel::CacheStaticText(std::string const & text, char const * 
   dp::TGlyphs glyphs;
   for (auto const & line : shapedLines)
     for (auto const & glyph : line.m_glyphs)
-      glyphs.emplace_back(glyph.m_fontIndex, glyph.m_glyphId);
+      glyphs.emplace_back(glyph.m_key);
 
-  std::ranges::sort(glyphs);
-  auto [begin, end] = std::ranges::unique(glyphs);
-  glyphs.erase(begin, end);
+  // buffer_vector doesn't work with std::ranges::sort
+  std::sort(glyphs.begin(), glyphs.end());
+  auto last = std::unique(glyphs.begin(), glyphs.end());
+  glyphs.erase(last, glyphs.end());
 
   return glyphs;
 }
@@ -307,7 +308,7 @@ dp::TGlyphs MutableLabel::GetGlyphs() const
 {
   dp::TGlyphs glyphs;
   for (auto const & glyph : m_shapedText.m_glyphs)
-    glyphs.emplace_back(glyph.m_fontIndex, glyph.m_glyphId);
+    glyphs.emplace_back(glyph.m_key);
   return glyphs;
 }
 
